@@ -74,11 +74,13 @@
   </div>
 
   <script>
+    let nickname = prompt("Enter your nickname:");
+  
     const ws = new WebSocket(`ws://${location.host}/ws`);
     const messages = document.getElementById("messages");
     const input = document.getElementById("msg");
     const sendBtn = document.getElementById("send");
-
+  
     ws.onmessage = (event) => {
       const msg = document.createElement("div");
       msg.classList.add("chat-message");
@@ -86,14 +88,19 @@
       messages.appendChild(msg);
       messages.scrollTop = messages.scrollHeight;
     };
-
+  
     sendBtn.onclick = () => {
-      if (input.value.trim()) {
-        ws.send(input.value.trim());
+      const text = input.value.trim();
+      if (text) {
+        const payload = {
+          nickname: nickname,
+          message: text,
+        };
+        ws.send(JSON.stringify(payload));
         input.value = "";
       }
     };
-
+  
     input.addEventListener("keydown", (e) => {
       if (e.key === "Enter") sendBtn.click();
     });

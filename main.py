@@ -1,5 +1,6 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
+import json
 
 app = FastAPI()
 active_connections = []
@@ -21,7 +22,15 @@ async def websocket_endpoint(websocket: WebSocket):
         await broadcast("📢 有人加入聊天室")
         while True:
             data = await websocket.receive_text()
-            await broadcast(f"🗣️ 匿名者: {data}")
+            try:
+                payload = json.loads(data)
+                nickname = payload.get("nickname", "Anonymous")
+                message = payload.get("message", "")
+                full_msg = f"🧑 {nickname}: {message}"
+            except json.JSONDecodeError:
+                full_msg = f"💬 Unknown message: {data}"
+
+            await broadcast(full_msg)
     except WebSocketDisconnect:
         active_connections.remove(websocket)
         await broadcast("❌ 有人離開聊天室")
