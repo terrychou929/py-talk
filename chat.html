@@ -43,67 +43,59 @@
     }
   </style>
 </head>
-<body>
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-lg-8 col-md-10">
-        <div class="card shadow-sm">
-          <div class="card-header text-center bg-primary text-white">
-            <h4 class="mb-0">💬 Anonymous Chatroom</h4>
-          </div>
-          <div class="card-body">
-            <div id="messages" class="chat-box mb-3"></div>
-            <div class="input-group">
-              <input
-                type="text"
-                id="msg"
-                class="form-control"
-                placeholder="Type your message..."
-                aria-label="Message"
-                autofocus
-              />
-              <button class="btn btn-primary" id="send">Send</button>
-            </div>
-          </div>
-          <div class="card-footer text-muted text-center">
-            Real-time chat powered by WebSocket
-          </div>
-        </div>
-      </div>
+
+<body class="container py-4">
+  <h2>🔐 Join a Chat Room</h2>
+  <div class="mb-3">
+    <input id="room" class="form-control" placeholder="Room name">
+    <input id="password" class="form-control mt-2" placeholder="Room password">
+    <input id="nickname" class="form-control mt-2" placeholder="Your nickname">
+    <button id="join" class="btn btn-primary mt-2">Join</button>
+  </div>
+
+  <div id="chatArea" class="d-none">
+    <div id="messages" class="border p-3 mb-2" style="height: 300px; overflow-y: scroll;"></div>
+    <div class="input-group">
+      <input id="msg" class="form-control" placeholder="Type your message...">
+      <button id="send" class="btn btn-success">Send</button>
     </div>
   </div>
 
   <script>
-    let nickname = prompt("Enter your nickname:");
-  
-    const ws = new WebSocket(`ws://${location.host}/ws`);
-    const messages = document.getElementById("messages");
-    const input = document.getElementById("msg");
-    const sendBtn = document.getElementById("send");
-  
-    ws.onmessage = (event) => {
-      const msg = document.createElement("div");
-      msg.classList.add("chat-message");
-      msg.textContent = event.data;
-      messages.appendChild(msg);
-      messages.scrollTop = messages.scrollHeight;
-    };
-  
-    sendBtn.onclick = () => {
-      const text = input.value.trim();
-      if (text) {
-        const payload = {
-          nickname: nickname,
-          message: text,
-        };
-        ws.send(JSON.stringify(payload));
-        input.value = "";
+    let ws;
+
+    document.getElementById("join").onclick = () => {
+      const room = document.getElementById("room").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const nickname = document.getElementById("nickname").value.trim() || "Anonymous";
+      if (!room || !password) {
+        alert("Room and password required.");
+        return;
       }
+
+      ws = new WebSocket(`ws://${location.host}/ws`);
+
+      ws.onopen = () => {
+        const init = { room, password, nickname };
+        ws.send(JSON.stringify(init));
+        document.getElementById("chatArea").classList.remove("d-none");
+      };
+
+      ws.onmessage = (event) => {
+        const msg = document.createElement("div");
+        msg.textContent = event.data;
+        document.getElementById("messages").appendChild(msg);
+        document.getElementById("messages").scrollTop = messages.scrollHeight;
+      };
+
+      document.getElementById("send").onclick = () => {
+        const text = document.getElementById("msg").value.trim();
+        if (text) {
+          ws.send(JSON.stringify({ message: text }));
+          document.getElementById("msg").value = "";
+        }
+      };
     };
-  
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") sendBtn.click();
-    });
   </script>
 </body>
 </html>
