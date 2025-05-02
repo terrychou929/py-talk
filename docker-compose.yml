@@ -30,6 +30,22 @@ services:
     networks:
       - chat-network
 
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5.2
+    restart: always
+    environment:
+      - PMA_HOST=db
+      - PMA_PORT=5432
+      - PMA_USER=postgres
+      - PMA_PASSWORD=postgres
+      - PMA_ARBITRARY=1
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    networks:
+      - chat-network
+
 volumes:
   db-data:
     driver: local
