@@ -43,3 +43,6 @@ htmlcov/
 nosetests.xml
 coverage.xml
 *.cover
+
+# pma required secret file
+config.secret.inc.php

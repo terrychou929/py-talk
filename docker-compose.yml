@@ -30,15 +30,14 @@ services:
     networks:
       - chat-network
 
-  phpmyadmin:
-    image: phpmyadmin
+  pgadmin:
+    image: dpage/pgadmin4:8.12
     restart: always
     environment:
-      - PMA_HOST=db
-      - PMA_PORT=5432
-      - PMA_USER=${PMA_USER}
-      - PMA_PASSWORD=${PMA_PASSWORD}
-      - PMA_ARBITRARY=1
+      - PGADMIN_DEFAULT_EMAIL=${PGA_USER}
+      - PGADMIN_DEFAULT_PASSWORD=${PGA_PASSWORD}
+      - PGADMIN_CONFIG_SERVER_MODE=False
+      - PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED=False
     ports:
       - "8080:80"
     depends_on:
